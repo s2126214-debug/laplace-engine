@@ -1,59 +1,56 @@
 import * as THREE from "three";
 
-export function createNetwork(scene){
+export function createNetwork(scene) {
 
     const group = new THREE.Group();
 
-    const points=[];
+    const nodeCount = 80;
+    const positions = [];
 
-    for(let i=0;i<80;i++){
+    const nodeGeometry = new THREE.SphereGeometry(3.5, 10, 10);
 
-        const mesh=new THREE.Mesh(
+    const nodeMaterial = new THREE.MeshBasicMaterial({
+        color: 0x66ccff
+    });
 
-            new THREE.SphereGeometry(2,8,8),
+    for(let i=0;i<nodeCount;i++){
 
-            new THREE.MeshBasicMaterial({
-                color:0x00ffff
-            })
+        const x=(Math.random()-0.5)*900;
+        const y=(Math.random()-0.5)*500;
+        const z=(Math.random()-0.5)*900;
 
-        );
+        positions.push(new THREE.Vector3(x,y,z));
 
-        mesh.position.set(
+        const node=new THREE.Mesh(nodeGeometry,nodeMaterial);
 
-            (Math.random()-0.5)*500,
-            (Math.random()-0.5)*500,
-            (Math.random()-0.5)*500
+        node.position.set(x,y,z);
 
-        );
-
-        group.add(mesh);
-
-        points.push(mesh);
+        group.add(node);
 
     }
 
-    const material=new THREE.LineBasicMaterial({
+    const lineMaterial=new THREE.LineBasicMaterial({
 
-        color:0x00ffff,
+        color:0x44bbff,
         transparent:true,
-        opacity:0.2
+        opacity:0.15
 
     });
 
-    for(let i=0;i<points.length;i++){
+    for(let i=0;i<positions.length;i++){
 
-        for(let j=i+1;j<points.length;j++){
+        for(let j=i+1;j<positions.length;j++){
 
-            if(points[i].position.distanceTo(points[j].position)<120){
+            if(positions[i].distanceTo(positions[j])<170){
 
                 const geometry=new THREE.BufferGeometry().setFromPoints([
-
-                    points[i].position,
-                    points[j].position
-
+                    positions[i],
+                    positions[j]
                 ]);
 
-                group.add(new THREE.Line(geometry,material));
+                const line=new THREE.Line(geometry,lineMaterial);
+
+                group.add(line);
 
             }
 
@@ -62,6 +59,8 @@ export function createNetwork(scene){
     }
 
     scene.add(group);
+
+    group.userData.time = 0;
 
     return group;
 

@@ -1,12 +1,231 @@
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:black;
-  font-family:sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-canvas{
-  display:block;
+html,
+body {
+  overflow: hidden;
+  background: black;
+  width: 100%;
+  height: 100%;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+canvas {
+  display: block;
+}
+
+#hud {
+  position: fixed;
+  top: 40px;
+  left: 40px;
+  color: white;
+  z-index: 100;
+  pointer-events: none;
+}
+
+#title {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 6px;
+}
+
+#status {
+  margin-top: 18px;
+  font-size: 18px;
+  color: #66ccff;
+  letter-spacing: 3px;
+  opacity: 0.85;
+}
+
+#title,
+#status{
+    opacity:0;
+    transition:opacity 1.5s ease;
+}
+
+.show{
+    opacity:1 !important;
+}
+
+#hud{
+
+position:fixed;
+
+left:40px;
+
+top:40px;
+
+color:white;
+
+font-family:monospace;
+
+pointer-events:none;
+
+z-index:100;
+
+}
+
+#title{
+
+font-size:42px;
+
+letter-spacing:8px;
+
+margin-bottom:10px;
+
+}
+
+#subtitle{
+
+color:#66ccff;
+
+margin-bottom:25px;
+
+font-size:18px;
+
+letter-spacing:2px;
+
+}
+
+#log{
+
+font-size:15px;
+
+line-height:28px;
+
+}
+
+.line{
+
+opacity:0;
+
+animation:fade .8s forwards;
+
+}
+
+@keyframes fade{
+
+from{
+
+opacity:0;
+
+transform:translateX(-15px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateX(0);
+
+}
+
+}
+
+#probability{
+
+position:fixed;
+
+left:50%;
+
+top:50%;
+
+transform:translate(-50%,-50%);
+
+text-align:center;
+
+pointer-events:none;
+
+z-index:90;
+
+}
+
+#prob-title{
+
+font-size:20px;
+
+letter-spacing:5px;
+
+color:#66ccff;
+
+margin-bottom:15px;
+
+font-family:monospace;
+
+}
+
+#prob-value{
+
+font-size:90px;
+
+font-weight:200;
+
+letter-spacing:6px;
+
+color:white;
+
+font-family:monospace;
+
+text-shadow:
+
+0 0 15px rgba(255,255,255,.25);
+
+}
+
+#system-status{
+
+position:fixed;
+
+top:40px;
+
+right:40px;
+
+color:white;
+
+font-family:monospace;
+
+width:240px;
+
+z-index:100;
+
+}
+
+.status-title{
+
+font-size:18px;
+
+letter-spacing:3px;
+
+margin-bottom:15px;
+
+color:#66ccff;
+
+}
+
+.status-item{
+
+display:flex;
+
+justify-content:space-between;
+
+margin-bottom:10px;
+
+font-size:15px;
+
+}
+
+#engine-status{
+
+color:#6cff8b;
+
+}
+
+#mode-status{
+
+color:#66ccff;
+
 }

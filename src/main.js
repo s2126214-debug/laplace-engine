@@ -1,20 +1,23 @@
+import { createVideoElement, startVideo } from "./video";
+import { nextScene } from "./sceneManager";
+import { createSystemStatus } from "./systemStatus";
+import { createProbability } from "./probability";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { createAudienceCamera } from "./camera";
+import { createHUD } from "./hud";
 import "./style.css";
 import * as THREE from "three";
+import { createUniverse } from "./universe";
+import { createNetwork } from "./network";
 
-// ===== Scene =====
+// シーン
 const scene = new THREE.Scene();
 
-// ===== Camera =====
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  1,
-  5000
-);
+// カメラ
+const camera = createAudienceCamera();
 
-camera.position.z = 800;
 
-// ===== Renderer =====
+// レンダラー
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
 });
@@ -23,169 +26,87 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setClearColor(0x000000);
 
+document.body.innerHTML = "";
 document.body.appendChild(renderer.domElement);
 
-// =====================
+const controls = new OrbitControls(camera, renderer.domElement);
+
+controls.enablePan = false;
+controls.enableZoom = false;
+controls.enableDamping = true;
+controls.dampingFactor = 0.03;
+
+createHUD();
+
+createProbability();
+
+createSystemStatus();
+
+const video = createVideoElement();
+
+startVideo(video).catch((err) => {
+  console.error(err);
+});
+
+setTimeout(() => {
+
+    const p = document.getElementById("probability");
+
+    p.style.transition = "opacity 2s";
+
+    p.style.opacity = "1";
+
+}, 7000);
+
 // 星空
-// =====================
+const stars = createUniverse(scene);
 
-const starCount = 5000;
-const positions = new Float32Array(starCount * 3);
+// AIネットワーク
+const network = createNetwork(scene);
 
-for (let i = 0; i < starCount * 3; i++) {
-  positions[i] = (Math.random() - 0.5) * 4000;
-}
-
-const starGeometry = new THREE.BufferGeometry();
-
-starGeometry.setAttribute(
-  "position",
-  new THREE.BufferAttribute(positions, 3)
-);
-
-const starMaterial = new THREE.PointsMaterial({
-  color: 0xffffff,
-  size: 4,
-  sizeAttenuation: true,
-});
-
-const stars = new THREE.Points(starGeometry, starMaterial);
-
-scene.add(stars);
-
-// =====================
-// AI NETWORK
-// =====================
-
-const network = new THREE.Group();
-
-const nodes = [];
-
-for (let i = 0; i < 70; i++) {
-
-  const node = new THREE.Mesh(
-
-    new THREE.SphereGeometry(2.5, 8, 8),
-
-    new THREE.MeshBasicMaterial({
-
-      color: 0x00ffff
-
-    })
-
-  );
-
-  node.position.set(
-
-    (Math.random() - 0.5) * 500,
-    (Math.random() - 0.5) * 500,
-    (Math.random() - 0.5) * 500
-
-  );
-
-  network.add(node);
-
-  nodes.push(node);
-
-}
-
-const lineMaterial = new THREE.LineBasicMaterial({
-
-  color: 0x00ffff,
-
-  transparent: true,
-
-  opacity: 0.15,
-
-});
-
-for (let i = 0; i < nodes.length; i++) {
-
-  for (let j = i + 1; j < nodes.length; j++) {
-
-    if (nodes[i].position.distanceTo(nodes[j].position) < 120) {
-
-      const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-
-        nodes[i].position,
-
-        nodes[j].position,
-
-      ]);
-
-      const line = new THREE.Line(lineGeometry, lineMaterial);
-
-      network.add(line);
-
-    }
-
-  }
-
-}
-
-scene.add(network);
-
-// =====================
-// HUD
-// =====================
-
-const hud = document.createElement("div");
-
-hud.style.position = "absolute";
-hud.style.left = "40px";
-hud.style.top = "40px";
-hud.style.color = "#66ffff";
-hud.style.fontFamily = "monospace";
-hud.style.fontSize = "20px";
-hud.style.whiteSpace = "pre";
-hud.style.pointerEvents = "none";
-
-document.body.appendChild(hud);
-
-// =====================
-// Animation
-// =====================
-
-let t = 0;
-
+// アニメーション
 function animate() {
 
-  requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 
-  t += 0.01;
+    controls.update();
 
-  stars.rotation.y += 0.00015;
-  stars.rotation.x += 0.00005;
+    stars.rotation.y += 0.00015;
+    stars.rotation.x += 0.00005;
 
-  network.rotation.y += 0.001;
-  network.rotation.x += 0.0002;
+    network.rotation.y += 0.0004;
 
-  const probability = (99.998 + Math.sin(t) * 0.001).toFixed(3);
+    // AIが呼吸するような演出
+    network.userData.time += 0.02;
 
-  hud.innerHTML = `LAPLACE ENGINE
+    const s =
+        1 +
+        Math.sin(network.userData.time) *
+        0.03;
 
-Universe : LOCKED
+    network.scale.set(s,s,s);
 
-Probability : ${probability} %
-
-Entropy : STABLE
-
-Nodes : ${nodes.length}`;
-
-  renderer.render(scene, camera);
+    renderer.render(scene,camera);
 
 }
 
 animate();
 
-// =====================
+window.addEventListener("keydown", (event) => {
 
+    if (event.code === "Space") {
+
+        event.preventDefault();
+
+        nextScene();
+
+    }
+
+});
+
+// リサイズ対応
 window.addEventListener("resize", () => {
-
   camera.aspect = window.innerWidth / window.innerHeight;
-
   camera.updateProjectionMatrix();
-
   renderer.setSize(window.innerWidth, window.innerHeight);
-
 });
